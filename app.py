@@ -12,9 +12,9 @@ import json
 from typing import Iterable
 from langchain_openai import OpenAIEmbeddings
 from langchain_community.vectorstores import Chroma
-from dotenv import load_dotenv
-load_dotenv()
-
+# from dotenv import load_dotenv
+# load_dotenv()
+openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"]
 
 def save_docs_to_jsonl(array:Iterable[Document], file_path:str)->None:
     with open(file_path, 'w') as jsonl_file:
@@ -35,11 +35,12 @@ def load_docs_from_jsonl(file_path)->Iterable[Document]:
 documents=load_docs_from_jsonl("fresh_chunk.jsonl")
 
 
-db = Chroma.from_documents(documents,OpenAIEmbeddings())
+db = Chroma.from_documents(documents,OpenAIEmbeddings(api_key=openai_api_key))
 retriever=db.as_retriever()
 
 
-os.environ["OPENAI_API_KEY"]=os.getenv("OPENAI_API_KEY")
+# os.environ["OPENAI_API_KEY"]=os.getenv("OPENAI_API_KEY")
+# api_key = openai_api_key
 ## Langmith tracking
 # os.environ["LANGCHAIN_TRACING_V2"]="true"
 # os.environ["LANGCHAIN_API_KEY"]=os.getenv("LANGCHAIN_API_KEY")
@@ -50,7 +51,7 @@ message = st.chat_message("assistant")
 message.write("Hello SASTRAite")
 input_text=st.text_input("ask your question here")
 
-llm=ChatOpenAI()
+llm=ChatOpenAI(api_key=openai_api_key)
 
 prompt = hub.pull("rlm/rag-prompt")
 
