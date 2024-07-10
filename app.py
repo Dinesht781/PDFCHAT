@@ -1,11 +1,11 @@
-import subprocess
-import sys
+# import subprocess
+# import sys
 
-def install_dependencies():
-    subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
+# def install_dependencies():
+#     subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", "requirements.txt"])
 
-# Install dependencies
-install_dependencies()
+# # Install dependencies
+# install_dependencies()
 
 from langchain_openai import ChatOpenAI
 from langchain_core.prompts import ChatPromptTemplate
