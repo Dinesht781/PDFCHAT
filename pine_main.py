@@ -27,8 +27,8 @@ from pinecone import Pinecone, ServerlessSpec
 # from dotenv import load_dotenv
 # load_dotenv()
 # openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"]
-openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"]
-pinecone_api_key = st.secrets["pinecone"]["PINECONE_API_KEY"]
+openai_api_key = st.secrets.get("openai.api_key")
+pinecone_api_key = st.secrets.get("pinecone.api_key")
 
 def save_docs_to_jsonl(array:Iterable[Document], file_path:str)->None:
     with open(file_path, 'w') as jsonl_file:
@@ -67,7 +67,7 @@ pc = Pinecone(api_key=pinecone_api_key)
 if use_serverless:  
     spec = ServerlessSpec(cloud='aws', region='us-east-1')  
 
-index_name = "chatsas"  # change if desired
+index_name = "sastrachat"  # change if desired
 namespace = "sasbot_pinecone"
 existing_indexes = [index_info["name"] for index_info in pc.list_indexes()]
 
@@ -96,7 +96,7 @@ vectorstore = Pinecone(
 )
 
 
-docsearch = vectorstore.from_documents(documents, embeddings, index_name=index_name,namespace=namespace,pinecone_api_key=pinecone_api_key)
+docsearch = vectorstore.from_documents(documents, embeddings, index_name=index_name,namespace=namespace)
 retriever = docsearch.as_retriever()
 
 st.title("SASBOT using GPT-3.5 LLM")
