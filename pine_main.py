@@ -91,6 +91,7 @@ vectorstore = Pinecone(
     index_name=index_name,
     embedding=embeddings,
     namespace=namespace,
+    pinecone_api_key=pinecone_api_key
 )
 
 
