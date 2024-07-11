@@ -95,7 +95,7 @@ vectorstore = Pinecone(
 )
 
 
-docsearch = vectorstore.from_documents(documents, embeddings, index_name=index_name,namespace=namespace)
+docsearch = vectorstore.from_documents(documents, embeddings, index_name=index_name,namespace=namespace,pinecone_api_key=pinecone_api_key)
 retriever = vectorstore.as_retriever()
 
 st.title("SASBOT using GPT-3.5 LLM")
