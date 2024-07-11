@@ -15,7 +15,7 @@ from langchain.chains import RetrievalQAWithSourcesChain
 from langchain_core.runnables import RunnablePassthrough
 from langchain import hub
 import streamlit as st
-import os
+# import os
 from  langchain.schema import Document
 import json
 from typing import Iterable
@@ -24,8 +24,9 @@ import time
 # from langchain_pinecone import PineconeVectorStore
 from pinecone import Pinecone, ServerlessSpec
 
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
+# openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"]
 openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"]
 pinecone_api_key = st.secrets["pinecone"]["PINECONE_API_KEY"]
 
@@ -95,7 +96,7 @@ vectorstore = Pinecone(
 )
 
 
-docsearch = vectorstore.from_documents(documents, embeddings, index_name=index_name,namespace=namespace,api_key=pinecone_api_key)
+docsearch = vectorstore.from_documents(documents, embeddings, index_name=index_name,namespace=namespace)
 retriever = docsearch.as_retriever()
 
 st.title("SASBOT using GPT-3.5 LLM")
@@ -120,5 +121,5 @@ rag_chain = (
 )
 
 if input_text:
-    st.write(rag_chain.invoke(input_text))
+     st.write(rag_chain.invoke(input_text))
 # print(rag_chain.invoke('what are the buildings present in SASTRA universiyty?'))
