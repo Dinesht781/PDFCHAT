@@ -28,7 +28,7 @@ def load_documents_from_jsonl(file_path: str) -> Iterable[Document]:
 
 def get_pinecone_index(pc: Pinecone, index_name: str, spec: str, dimension=1536, metric="cosine"):
     """Creates a Pinecone index if it doesn't exist."""
-    index=index_name
+    # index=index_name
     existing_indexes = [index_info["name"] for index_info in pc.list_indexes()]
     if index_name not in existing_indexes:
         pc.create_index(
@@ -54,7 +54,7 @@ def create_vector_store(docs,index_name,embeddings,namespace):
     return docsearch
 def get_vector_store(pc:Pinecone,index_name:str,spec:str,docs,embeddings,namespace):
     existing_indexes = [index_info["name"] for index_info in pc.list_indexes()]
-    print(existing_indexes)
+    # print(existing_indexes)
     if index_name not in existing_indexes:
         # print("creating new index")
         get_pinecone_index(pc,index_name,spec)
@@ -96,8 +96,18 @@ llm = ChatOpenAI(api_key=openai_api_key)
 # retriever = get_vector_store(pc,index_name,spec,docs,embeddings,namespace).as_retriever()
 chain = get_rag_chain(pc,index_name,spec,docs,embeddings,namespace,llm)
 # chain.invoke('what are areas of interests of ghousiya begum?')
-
+st.set_page_config(page_title="SASBOT", page_icon="🤖")
 st.title("SASBOT using GPT-3.5 LLM")
+with st.sidebar:
+    sidebar=st.sidebar
+    sidebar.title("About")
+    # sidebar.markdown(f"[Google](https://www.google.com/)")
+    sidebar.header('Developed By')
+    sidebar.markdown(f"[Dinesh Tippavarjula](https://www.linkedin.com/in/tippavarjula-dinesh/)")
+    sidebar.markdown(f"[Sai Pavan Pasupuleti](https://www.linkedin.com/in/sai-pavan-pasupuleti-78254b248/)")
+    # Add a link to the sidebar using a button
+    # st.sidebar.button("Wikipedia", on_click=lambda x: st.sidebar.text("https://www.wikipedia.org/(https://www.wikipedia.org/)"))
+    
 message = st.chat_message("assistant")
 message.write("Hello SASTRAite")
 input_text=st.text_input("ask your question here")
