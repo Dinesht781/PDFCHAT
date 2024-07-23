@@ -15,65 +15,49 @@ from langchain_community.vectorstores import chroma
 from langchain_core.runnables import RunnablePassthrough
 from langchain import hub
 import streamlit as st
-import os
-from  langchain.schema import Document
-import json
-from typing import Iterable
 from langchain_openai import OpenAIEmbeddings
+## Load modules from residue.py
 from langchain_community.vectorstores import Chroma
-# from dotenv import load_dotenv
-# load_dotenv()
+
+from residue import save_docs_to_jsonl, load_docs_from_jsonl,format_docs
+
+## Instead of load_dotenv visit to see how you can handle secrets in streamlit
 openai_api_key = st.secrets["openai"]["OPENAI_API_KEY"]
 
-def save_docs_to_jsonl(array:Iterable[Document], file_path:str)->None:
-    with open(file_path, 'w') as jsonl_file:
-        for doc in array:
-            jsonl_file.write(doc.json() + '\n')
-
-def load_docs_from_jsonl(file_path)->Iterable[Document]:
-    array = []
-    with open(file_path, 'r') as jsonl_file:
-        for line in jsonl_file:
-            data = json.loads(line)
-            obj = Document(**data)
-            array.append(obj)
-    return array
-# save_docs_to_jsonl(documents,'chunk_data.jsonl')
+documents = load_docs_from_jsonl("fresh_chunk.jsonl")
+db = Chroma.from_documents(documents, OpenAIEmbeddings(api_key=openai_api_key))
+retriever = db.as_retriever()
 
 
-documents=load_docs_from_jsonl("fresh_chunk.jsonl")
+def main():
+    ## Title | Introduction
+    st.title("SASBOT using GPT-3.5 LLM")
+    message = st.chat_message("assistant")
+    message.write("Hello SASTRAite")
+
+    ## User Input OpenAI key
+    st.header(f"Set your OpenAI API Key")
+    st.sidebar.link_button("get one @ Cohere 🔗", "https://openai.com/api/")
+    openai_api_key = st.text_input("password", type="password", label_visibility="collapsed")
+    if openai_api_key:
+        llm = ChatOpenAI(api_key=openai_api_key)
+        input_text = st.text_input("ask your question here")
+
+        prompt = hub.pull("rlm/rag-prompt")
+
+        rag_chain = (
+                {"context": retriever | format_docs, "question": RunnablePassthrough()}
+                | prompt
+                | llm
+                | StrOutputParser()
+        )
+
+        if input_text:
+            st.write(rag_chain.invoke(input_text))
+    else:
+        st.sidebar.error(f"Please enter a Valid KEY")
+        st.stop()
 
 
-db = Chroma.from_documents(documents,OpenAIEmbeddings(api_key=openai_api_key))
-retriever=db.as_retriever()
-
-
-# os.environ["OPENAI_API_KEY"]=os.getenv("OPENAI_API_KEY")
-# api_key = openai_api_key
-## Langmith tracking
-# os.environ["LANGCHAIN_TRACING_V2"]="true"
-# os.environ["LANGCHAIN_API_KEY"]=os.getenv("LANGCHAIN_API_KEY")
-
-
-st.title("SASBOT using GPT-3.5 LLM")
-message = st.chat_message("assistant")
-message.write("Hello SASTRAite")
-input_text=st.text_input("ask your question here")
-
-llm=ChatOpenAI(api_key=openai_api_key)
-
-prompt = hub.pull("rlm/rag-prompt")
-
-def format_docs(docs):
-    return "\n\n".join(doc.page_content for doc in docs)
-
-
-rag_chain = (
-    {"context": retriever | format_docs, "question": RunnablePassthrough()}
-    | prompt
-    | llm
-    | StrOutputParser()
-)
-
-if input_text:
-    st.write(rag_chain.invoke(input_text))
+if __name__ == "__main__":
+    main()
