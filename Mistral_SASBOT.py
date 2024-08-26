@@ -1,12 +1,13 @@
 import streamlit as st
-from langchain_openai import ChatOpenAI,OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
+from langchain_groq import ChatGroq
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain_core.prompts import ChatPromptTemplate
 # from langchain_core.output_parsers import StrOutputParser
 from langchain.chains import create_retrieval_chain
 # from langchain.chains import RetrievalQAWithSourcesChain
 # from langchain_core.runnables import RunnablePassthrough
-# from langchain import hub
+from langchain import hub
 import json
 from typing import Iterable
 from  langchain.schema import Document
@@ -14,9 +15,9 @@ from pinecone import Pinecone
 from pinecone import ServerlessSpec
 from langchain_pinecone import PineconeVectorStore
 import time
-# import os
-# from dotenv import load_dotenv
-# load_dotenv()
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 
 def load_documents_from_jsonl(file_path: str) -> Iterable[Document]:
@@ -83,8 +84,8 @@ def get_rag_chain(pc,index_name,spec,docs,embeddings,namespace,llm):
         Questions:{input}
         """
         )
-    # def format_docs(docs):
-    #     return "\n\n".join(doc.page_content for doc in docs)
+    def format_docs(docs):
+        return "\n\n".join(doc.page_content for doc in docs)
     retriever = get_vector_store(pc,index_name,spec,docs,embeddings,namespace).as_retriever()
     # rag_chain = (
     # {"context": retriever | format_docs, "question": RunnablePassthrough()}
@@ -96,23 +97,24 @@ def get_rag_chain(pc,index_name,spec,docs,embeddings,namespace,llm):
     return rag_chain
 openai_api_key = st.secrets.get("openai.api_key")
 pinecone_api_key = st.secrets.get("pinecone.api_key")
-# groq_api_key=os.environ['GROQ_API_KEY']
+groq_api_key=os.environ['GROQ_API_KEY']
 use_serverless='true'
 pc = Pinecone(api_key=pinecone_api_key)
 
 if use_serverless:  
     spec = ServerlessSpec(cloud='aws', region='us-east-1')
-index_name = "sastrachat"  
+index_name = "sastrachat"  # change if desired
 namespace = "sasbot_pinecone"
 
 embeddings=OpenAIEmbeddings(api_key=openai_api_key)
 docs=load_documents_from_jsonl("fresh_chunk.jsonl")
-llm = ChatOpenAI(api_key=openai_api_key)
+llm = ChatGroq(groq_api_key=groq_api_key,
+             model_name="mixtral-8x7b-32768")
 # retriever = get_vector_store(pc,index_name,spec,docs,embeddings,namespace).as_retriever()
 chain = get_rag_chain(pc,index_name,spec,docs,embeddings,namespace,llm)
 # chain.invoke('what are areas of interests of ghousiya begum?')
 st.set_page_config(page_title="SASBOT", page_icon="🤖")
-st.title("SASBOT using GPT-3.5 LLM")
+st.title("SASBOT using Mistral-8x7b LLM")
 with st.sidebar:
     sidebar=st.sidebar
     sidebar.title("About")
@@ -120,7 +122,7 @@ with st.sidebar:
     sidebar.header('Developed By')
     sidebar.markdown(f"[Dinesh Tippavarjula](https://www.linkedin.com/in/tippavarjula-dinesh/)")
     sidebar.markdown(f"[Sai Pavan Pasupuleti](https://www.linkedin.com/in/sai-pavan-pasupuleti-78254b248/)")
-    
+    # Add a link to the sidebar using a button
     # st.sidebar.button("Wikipedia", on_click=lambda x: st.sidebar.text("https://www.wikipedia.org/(https://www.wikipedia.org/)"))
     
 message = st.chat_message("assistant")
