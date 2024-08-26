@@ -83,8 +83,8 @@ def get_rag_chain(pc,index_name,spec,docs,embeddings,namespace,llm):
         Questions:{input}
         """
         )
-    def format_docs(docs):
-        return "\n\n".join(doc.page_content for doc in docs)
+    # def format_docs(docs):
+    #     return "\n\n".join(doc.page_content for doc in docs)
     retriever = get_vector_store(pc,index_name,spec,docs,embeddings,namespace).as_retriever()
     # rag_chain = (
     # {"context": retriever | format_docs, "question": RunnablePassthrough()}
@@ -102,7 +102,7 @@ pc = Pinecone(api_key=pinecone_api_key)
 
 if use_serverless:  
     spec = ServerlessSpec(cloud='aws', region='us-east-1')
-index_name = "sastrachat"  # change if desired
+index_name = "sastrachat"  
 namespace = "sasbot_pinecone"
 
 embeddings=OpenAIEmbeddings(api_key=openai_api_key)
@@ -112,7 +112,7 @@ llm = ChatOpenAI(api_key=openai_api_key)
 chain = get_rag_chain(pc,index_name,spec,docs,embeddings,namespace,llm)
 # chain.invoke('what are areas of interests of ghousiya begum?')
 st.set_page_config(page_title="SASBOT", page_icon="🤖")
-st.title("SASBOT using Mistral-8x7b LLM")
+st.title("SASBOT using GPT-3.5 LLM")
 with st.sidebar:
     sidebar=st.sidebar
     sidebar.title("About")
@@ -120,7 +120,7 @@ with st.sidebar:
     sidebar.header('Developed By')
     sidebar.markdown(f"[Dinesh Tippavarjula](https://www.linkedin.com/in/tippavarjula-dinesh/)")
     sidebar.markdown(f"[Sai Pavan Pasupuleti](https://www.linkedin.com/in/sai-pavan-pasupuleti-78254b248/)")
-    # Add a link to the sidebar using a button
+    
     # st.sidebar.button("Wikipedia", on_click=lambda x: st.sidebar.text("https://www.wikipedia.org/(https://www.wikipedia.org/)"))
     
 message = st.chat_message("assistant")
